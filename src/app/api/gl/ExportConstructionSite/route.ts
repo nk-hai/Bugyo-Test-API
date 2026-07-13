@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 const getJstNow = () => {
   const now = new Date();
@@ -6,7 +6,7 @@ const getJstNow = () => {
   const jst = new Date(
     now.toLocaleString("en-US", {
       timeZone: "Asia/Tokyo",
-    })
+    }),
   );
 
   const yyyy = jst.getFullYear();
@@ -19,10 +19,36 @@ const getJstNow = () => {
   return `${yyyy}/${MM}/${dd} ${hh}:${mm}:${ss}`;
 };
 
-export async function POST() {
+const compare = (
+  left: string | number,
+  operator: string,
+  right: string | number,
+) => {
+  switch (operator) {
+    case "eq":
+      return left == right;
+    case "ne":
+      return left != right;
+    case "gt":
+      return left > right;
+    case "ge":
+      return left >= right;
+    case "lt":
+      return left < right;
+    case "le":
+      return left <= right;
+    default:
+      return true;
+  }
+};
+
+export async function POST(req: NextRequest) {
   const now = getJstNow();
 
-  return NextResponse.json([
+  const body = await req.json();
+
+  const { filter, itemList } = body;
+  const data = [
     // ===== 工事A =====
     {
       GL0010000: "*",
@@ -300,5 +326,32 @@ export async function POST() {
       GL1060901: "EMP003",
       GL1060902: "1",
     },
-  ]);
+  ];
+
+  let result: Record<string, any>[] = [...data];
+
+  // filter
+  if (filter?.itemKey) {
+    result = result.filter((row) =>
+      compare(
+        row[filter.itemKey as keyof typeof row] ?? "",
+        filter.operator,
+        filter.value,
+      ),
+    );
+  }
+
+  // select columns
+  if (Array.isArray(itemList) && itemList.length > 0) {
+    result = result.map((row) =>
+      Object.fromEntries(
+        itemList.map((key: string) => [
+          key,
+          row[key as keyof typeof row] ?? "",
+        ]),
+      ),
+    );
+  }
+
+  return NextResponse.json(result);
 }
