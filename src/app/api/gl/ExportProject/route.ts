@@ -16,7 +16,7 @@ const getJstNow = () => {
   const mm = String(jst.getMinutes()).padStart(2, "0");
   const ss = String(jst.getSeconds()).padStart(2, "0");
 
-  return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
+  return `${yyyy}/${MM}/${dd} ${hh}:${mm}:${ss}`;
 };
 
 export async function POST() {
