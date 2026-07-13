@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function POST() {
   const data = [
     {
       GL1080001: "P001",

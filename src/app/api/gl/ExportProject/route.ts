@@ -19,7 +19,7 @@ const getJstNow = () => {
   return `${yyyy}-${MM}-${dd} ${hh}:${mm}:${ss}`;
 };
 
-export async function GET() {
+export async function POST() {
   const data = [
     {
       GL0010000: "*",
